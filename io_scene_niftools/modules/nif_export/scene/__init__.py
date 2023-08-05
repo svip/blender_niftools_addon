@@ -50,7 +50,18 @@ def get_version_data():
     NifLog.info(f"Writing NIF version 0x{version:08X}")
 
     # get user version and user version 2 for export
-    user_version = b_scene.user_version if b_scene.user_version else b_scene.USER_VERSION.get(game, 0)
-    user_version_2 = b_scene.user_version_2 if b_scene.user_version_2 else b_scene.USER_VERSION_2.get(game, 0)
+    # unfortunately, if USER_VERSION/USER_VERSION_2 is set to 0,
+    # Blender might simply remove the attribute altogether, therefore we need
+    # a check on whether it is there.
+    user_version = 0
+    if b_scene.user_version:
+        user_version = b_scene.user_version
+    elif hasattr(b_scene, "USER_VERSION"):
+        user_version = b_scene.USER_VERSION.get(game, 0)
+    user_version_2 = 0
+    if b_scene.user_version_2:
+        user_version_2 = b_scene.user_version_2
+    elif hasattr(b_scene, "USER_VERSION_2"):
+        user_version_2 = b_scene.USER_VERSION_2.get(game, 0)
 
     return version, NifFormat.NifFile.from_version(version, user_version, user_version_2)
